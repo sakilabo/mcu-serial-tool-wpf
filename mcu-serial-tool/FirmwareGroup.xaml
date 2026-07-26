@@ -1,0 +1,93 @@
+<GroupBox x:Class="MCUSerialTool.FirmwareGroup"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          Header="ファームウェア"
+          Style="{StaticResource GroupBoxStyle}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0"
+              Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="FirmwarePath"
+                     Margin="0,0,8,0"
+                     Padding="4,0"
+                     IsReadOnly="True"
+                     VerticalContentAlignment="Center"/>
+            <TextBlock Grid.Column="0"
+                       Margin="5,0,8,0"
+                       Text=".bin ファイル選択してください (ドラッグ＆ドロップ対応)"
+                       Foreground="Gray"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility"
+                                Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=FirmwarePath}"
+                                         Value="">
+                                <Setter Property="Visibility"
+                                        Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Button x:Name="BrowseButton"
+                    Grid.Column="1"
+                    Content="参照..."/>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0,4,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="FirmwareTypeText"
+                       VerticalAlignment="Center"
+                       Text="ファームウェア種別: 未選択"/>
+            <CheckBox x:Name="VerifyFirmwareCheckBox"
+                      Grid.Column="1"
+                      Content="ベリファイする"
+                      IsChecked="False"
+                      VerticalAlignment="Center"/>
+        </Grid>
+        <Button x:Name="WriteButton"
+                Grid.Row="2"
+                Content="書き込み"
+                IsEnabled="False">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}"
+                       BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Background"
+                            Value="#20A040"/>
+                    <Setter Property="Foreground"
+                            Value="White"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsEnabled"
+                                 Value="False">
+                            <Setter Property="Background"
+                                    Value="#E0E0E0"/>
+                            <Setter Property="Foreground"
+                                    Value="#707070"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <ProgressBar Grid.Row="3"
+                     Height="12"
+                     Margin="0,6,0,0"
+                     Minimum="0"
+                     Maximum="1"
+                     Value="{Binding WriteProgress, Mode=OneWay}"
+                     IsIndeterminate="{Binding IsWriteProgressIndeterminate, Mode=OneWay}"/>
+    </Grid>
+</GroupBox>

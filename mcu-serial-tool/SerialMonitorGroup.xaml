@@ -1,0 +1,278 @@
+<GroupBox x:Class="MCUSerialTool.SerialMonitorGroup"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:local="clr-namespace:MCUSerialTool"
+          Header="シリアルモニター"
+          Style="{StaticResource GroupBoxStyle}">
+    <GroupBox.Resources>
+        <SolidColorBrush x:Key="MonitorConnectedBackground"
+                         Color="#404040"/>
+        <SolidColorBrush x:Key="MonitorInactiveBackground"
+                         Color="#808080"/>
+        <SolidColorBrush x:Key="MonitorForeground"
+                         Color="#F0F0F0"/>
+        <Style x:Key="SerialMonitorButtonStyle"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="IsEnabled"
+                    Value="False"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Mode}"
+                             Value="SerialMonitor">
+                    <Setter Property="IsEnabled"
+                            Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InteractiveModeButtonStyle"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="IsEnabled"
+                    Value="False"/>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding ConnectionType}"
+                                   Value="TWELITE"/>
+                        <Condition Binding="{Binding Mode}"
+                                   Value="SerialMonitor"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="IsEnabled"
+                            Value="True"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SerialMonitorSendButtonStyle"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource SerialMonitorButtonStyle}">
+            <Setter Property="Content"
+                    Value="ENTER"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=SendOnlyOption}"
+                             Value="True">
+                    <Setter Property="Content"
+                            Value="送信"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </GroupBox.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="114"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <Binding Path="Port"
+                             StringFormat="接続先: {0}"
+                             FallbackValue="接続先: 未接続"
+                             TargetNullValue="接続先: 未接続"/>
+                </TextBlock.Text>
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       Text="通信速度"
+                       VerticalAlignment="Center"/>
+            <ComboBox x:Name="SerialMonitorBaudRate"
+                      Grid.Column="2"
+                      Margin="6,0,0,0"
+                      VerticalContentAlignment="Center">
+                <ComboBox.Style>
+                    <Style TargetType="{x:Type ComboBox}"
+                           BasedOn="{StaticResource {x:Type ComboBox}}">
+                        <Setter Property="IsEnabled"
+                                Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}"
+                                         Value="SerialMonitor">
+                                <Setter Property="IsEnabled"
+                                        Value="True"/>
+                            </DataTrigger>
+                            <Trigger Property="IsEnabled"
+                                     Value="False">
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource
+                                            {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+            <Button x:Name="SerialMonitorInteractiveModeButton"
+                    Grid.Column="4"
+                    Content="+ + +"
+                    Style="{StaticResource InteractiveModeButtonStyle}"/>
+            <Button x:Name="SerialMonitorDisconnectButton"
+                    Grid.Column="5"
+                    Content="切断"
+                    Margin="18,0,0,0"
+                    Style="{StaticResource SerialMonitorButtonStyle}"/>
+            <Button x:Name="SerialMonitorResetButton"
+                    Grid.Column="6"
+                    Margin="6,0,0,0"
+                    Content="リセット"
+                    Style="{StaticResource SerialMonitorButtonStyle}"/>
+            <Button x:Name="SerialMonitorClearButton"
+                    Grid.Column="7"
+                    Margin="6,0,0,0"
+                    Content="クリア"
+                    Style="{StaticResource SerialMonitorButtonStyle}"/>
+        </Grid>
+        <local:SerialMonitorTextBox x:Name="SerialMonitorOutput"
+                                    Grid.Row="1"
+                                    Margin="0,10,0,0"
+                                    IsTabStop="False"
+                                    Focusable="True"
+                                    KeyboardNavigation.TabNavigation="None"
+                                    IsInactiveSelectionHighlightEnabled="True"
+                                    AcceptsReturn="True"
+                                    FontFamily="Consolas"
+                                    FontSize="15"
+                                    BorderThickness="1"
+                                    Padding="2">
+            <local:SerialMonitorTextBox.Style>
+                <Style TargetType="{x:Type local:SerialMonitorTextBox}"
+                       BasedOn="{StaticResource {x:Type TextBox}}">
+                    <Setter Property="Background"
+                            Value="{DynamicResource MonitorInactiveBackground}"/>
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource MonitorForeground}"/>
+                    <Setter Property="CaretBrush"
+                            Value="{DynamicResource MonitorForeground}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Mode}"
+                                     Value="Programming">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource
+                                        {x:Static SystemColors.WindowBrushKey}}"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource
+                                        {x:Static SystemColors.WindowTextBrushKey}}"/>
+                            <Setter Property="CaretBrush"
+                                    Value="{DynamicResource
+                                        {x:Static SystemColors.WindowTextBrushKey}}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Mode}"
+                                     Value="SerialMonitor">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource MonitorConnectedBackground}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </local:SerialMonitorTextBox.Style>
+            <local:SerialMonitorTextBox.Resources>
+                <Style TargetType="{x:Type ScrollBar}">
+                    <Setter Property="Focusable"
+                            Value="False"/>
+                    <Setter Property="IsTabStop"
+                            Value="False"/>
+                </Style>
+            </local:SerialMonitorTextBox.Resources>
+        </local:SerialMonitorTextBox>
+        <Grid Grid.Row="2"
+              Margin="0,10,0,0">
+            <Grid.Resources>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="VerticalAlignment"
+                            Value="Center"/>
+                </Style>
+                <Style TargetType="{x:Type RadioButton}">
+                    <Setter Property="VerticalAlignment"
+                            Value="Center"/>
+                    <Setter Property="VerticalContentAlignment"
+                            Value="Center"/>
+                </Style>
+                <Style TargetType="{x:Type CheckBox}">
+                    <Setter Property="VerticalAlignment"
+                            Value="Center"/>
+                    <Setter Property="VerticalContentAlignment"
+                            Value="Center"/>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Margin="0,0,0,0"
+                       Text="Enter キーの動作"/>
+            <RadioButton x:Name="SendWithCrOption"
+                         Grid.Column="1"
+                         GroupName="EnterKeyBehavior"
+                         Margin="15,0,0,0"
+                         Content="送信 + CR"
+                         IsChecked="True"/>
+            <RadioButton x:Name="SendWithCrLfOption"
+                         Grid.Column="2"
+                         GroupName="EnterKeyBehavior"
+                         Margin="15,0,0,0"
+                         Content="送信 + CRLF"/>
+            <RadioButton x:Name="SendOnlyOption"
+                         Grid.Column="3"
+                         GroupName="EnterKeyBehavior"
+                         Margin="15,0,0,0"
+                         Content="送信のみ"/>
+            <CheckBox x:Name="EnableEscapeCharacters"
+                      Grid.Column="4"
+                      Margin="30,0,0,0"
+                      Content="エスケープ文字を有効にする"
+                      IsChecked="True"
+                      ToolTipService.InitialShowDelay="50">
+                <CheckBox.ToolTip>
+                    <TextBlock>
+                        <Run Text="\r : CR"/>
+                        <LineBreak/>
+                        <Run Text="\n : LF"/>
+                        <LineBreak/>
+                        <Run Text="\t : Tab"/>
+                        <LineBreak/>
+                        <Run Text="\0 : NUL"/>
+                        <LineBreak/>
+                        <Run Text="\\ : バックスラッシュ"/>
+                        <LineBreak/>
+                        <Run Text="\xHH : 文字コード (16進数2桁)"/>
+                    </TextBlock>
+                </CheckBox.ToolTip>
+            </CheckBox>
+        </Grid>
+        <Grid Grid.Row="3"
+              Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="SerialMonitorInput"
+                     MinHeight="26"
+                     Padding="4,0"
+                     FontFamily="Consolas"
+                     FontSize="15"
+                     VerticalContentAlignment="Center"/>
+            <Button x:Name="SerialMonitorSendButton"
+                    Grid.Column="1"
+                    Margin="6,0,0,0"
+                    FontFamily="Consolas"
+                    Style="{StaticResource SerialMonitorSendButtonStyle}"/>
+            <Button x:Name="SerialMonitorEscapeButton"
+                    Grid.Column="2"
+                    Margin="6,0,0,0"
+                    FontFamily="Consolas"
+                    Content="ESC"
+                    Style="{StaticResource SerialMonitorButtonStyle}"/>
+        </Grid>
+    </Grid>
+</GroupBox>

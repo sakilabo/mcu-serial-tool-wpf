@@ -1,0 +1,6 @@
+.agents/
+.claude/
+**/bin/
+**/obj/
+*.user
+*.suo

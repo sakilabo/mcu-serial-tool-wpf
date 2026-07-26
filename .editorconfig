@@ -1,0 +1,4 @@
+root = true
+
+[mcu-serial-tool/FTD2XX_NET_*/*.cs]
+dotnet_diagnostic.CS8618.severity = none

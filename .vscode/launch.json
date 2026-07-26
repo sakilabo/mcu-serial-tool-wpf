@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "mcu-serial-tool (Debug)",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build Debug",
+            "program": "${workspaceFolder}/mcu-serial-tool/bin/Debug/net48/マイコンアプリ更新ツール.exe",
+            "cwd": "${workspaceFolder}/mcu-serial-tool/bin/Debug/net48",
+            "justMyCode": true,
+            "stopAtEntry": false
+        }
+    ]
+}
