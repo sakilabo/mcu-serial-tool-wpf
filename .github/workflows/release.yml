@@ -1,0 +1,92 @@
+name: Publish release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: windows-2025
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore mcu-serial-tool.sln
+
+      - name: Build release
+        run: >
+          dotnet build mcu-serial-tool.sln
+          --configuration Release
+          --no-restore
+
+      - name: Create release archive
+        id: archive
+        shell: pwsh
+        run: |
+          $outputDirectory = Join-Path $env:GITHUB_WORKSPACE `
+            "mcu-serial-tool\bin\Release\net48"
+          if (-not (Test-Path -LiteralPath $outputDirectory)) {
+            throw "Release output was not found: $outputDirectory"
+          }
+
+          $safeTag = $env:GITHUB_REF_NAME -replace '[^\w.-]', '-'
+          $archivePath = Join-Path $env:RUNNER_TEMP `
+            "mcu-serial-tool-$safeTag.zip"
+          Compress-Archive `
+            -Path (Join-Path $outputDirectory "*") `
+            -DestinationPath $archivePath
+          "path=$archivePath" >> $env:GITHUB_OUTPUT
+
+      - name: Create release notes
+        id: release_notes
+        shell: bash
+        run: |
+          heading="## [${GITHUB_REF_NAME#v}]"
+          awk -v heading="$heading" '
+            $0 == heading || index($0, heading " - ") == 1 { p=1; next }
+            p && /^## \[/ { exit }
+            p
+          ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
+          test -s "$RUNNER_TEMP/release-notes.md"
+          echo "path=$RUNNER_TEMP/release-notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARCHIVE_PATH: ${{ steps.archive.outputs.path }}
+          RELEASE_NOTES_PATH: ${{ steps.release_notes.outputs.path }}
+        run: |
+          gh release view $env:GITHUB_REF_NAME `
+            --repo $env:GITHUB_REPOSITORY 2>$null
+          $releaseExists = $LASTEXITCODE -eq 0
+
+          if ($releaseExists) {
+            gh release edit $env:GITHUB_REF_NAME `
+              --notes-file $env:RELEASE_NOTES_PATH `
+              --repo $env:GITHUB_REPOSITORY
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+            gh release upload $env:GITHUB_REF_NAME $env:ARCHIVE_PATH `
+              --clobber `
+              --repo $env:GITHUB_REPOSITORY
+            exit $LASTEXITCODE
+          }
+
+          gh release create $env:GITHUB_REF_NAME $env:ARCHIVE_PATH `
+            --notes-file $env:RELEASE_NOTES_PATH `
+            --title $env:GITHUB_REF_NAME `
+            --verify-tag `
+            --repo $env:GITHUB_REPOSITORY
