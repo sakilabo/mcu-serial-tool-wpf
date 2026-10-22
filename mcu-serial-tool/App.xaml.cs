@@ -7,6 +7,18 @@ namespace MCUSerialTool
     {
         private static readonly uint[] Crc32Table = BuildCrc32Table();
 
+        protected override async void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            if (!CommandLine.IsCommand(e.Args))
+            {
+                new MainWindow().Show();
+                return;
+            }
+            var exitCode = await CommandLine.RunAsync(e.Args);
+            Shutdown(exitCode);
+        }
+
         internal static uint ReadUInt32BE(byte[] data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
