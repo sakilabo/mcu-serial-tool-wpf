@@ -5,7 +5,7 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>MCUSerialTool</RootNamespace>
     <AssemblyName>マイコンアプリ更新ツール</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <ApplicationIcon>icon\Icon.ico</ApplicationIcon>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
